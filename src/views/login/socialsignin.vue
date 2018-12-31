@@ -1,8 +1,14 @@
 <template>
   <div class="social-signup-container">
-    <div class="sign-btn" @click="wechatHandleClick('wechat')">
+    <div v-loading.fullscreen.lock="fullscreenLoading" class="sign-btn" @click="wechatHandleClick('wechat')">
       <span class="wx-svg-container"><svg-icon icon-class="wechat" class="icon"/></span> 微信
     </div>
+    <el-button
+      type="primary"
+      @click="openFullScreen"
+    >
+      指令方式
+    </el-button>
     <div class="sign-btn" @click="tencentHandleClick('tencent')">
       <span class="qq-svg-container"><svg-icon icon-class="qq" class="icon"/></span> QQ
     </div>
@@ -14,19 +20,29 @@
 
 export default {
   name: 'SocialSignin',
+  data() {
+    return {
+      fullscreenLoading: false
+    }
+  },
   methods: {
     wechatHandleClick(thirdpart) {
-      // var fs = window.Jscall.fs
-      // var iopath2 = __dirname + '\\ClientScreen_START.dll'
-      // var clientScreenDLL = ff.Library(iopath2, {
-      //   'GetWorkingStatus': ['int', []],
-      //   'SetWorkingMode': ['int', ['int']],
-      //   'GetDeviceInfo': ['int', ['int', 'string']],
-      //   'GetVid': ['int', ['int', 'string']]
-      // })
-      // var ref = window.Jscall.ref
-      var aaaa = window.Jscall.clientScreen_GetDeviceInfo()
-      console.log(aaaa)
+      // const aww = window.Jscall.clientScreenGetWorkingStatus()
+      // console.log(aww)
+      // aa
+      // const aaaa = window.Jscall.clientScreenGetDeviceInfo()
+      // console.log(aaaa)
+      this.openFullScreen()
+    },
+    openFullScreen() {
+      console.log('openFullScreen')
+      this.fullscreenLoading = true
+      setTimeout(() => {
+        console.log('clientScreenShowMainScreen')
+        window.Jscall.clientScreenShowMainScreen('aaaaaa', '啊啊啊啊')
+        this.fullscreenLoading = false
+      }, 100)
+      console.log('aaaa')
     },
     tencentHandleClick(thirdpart) {
       alert('ok')
