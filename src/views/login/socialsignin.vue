@@ -16,12 +16,17 @@ export default {
   name: 'SocialSignin',
   methods: {
     wechatHandleClick(thirdpart) {
-      alert('ok')
-      // this.$store.commit('SET_AUTH_TYPE', thirdpart)
-      // const appid = 'xxxxx'
-      // const redirect_uri = encodeURIComponent('xxx/redirect?redirect=' + window.location.origin + '/auth-redirect')
-      // const url = 'https://open.weixin.qq.com/connect/qrconnect?appid=' + appid + '&redirect_uri=' + redirect_uri + '&response_type=code&scope=snsapi_login#wechat_redirect'
-      // openWindow(url, thirdpart, 540, 540)
+      // var fs = window.Jscall.fs
+      // var iopath2 = __dirname + '\\ClientScreen_START.dll'
+      // var clientScreenDLL = ff.Library(iopath2, {
+      //   'GetWorkingStatus': ['int', []],
+      //   'SetWorkingMode': ['int', ['int']],
+      //   'GetDeviceInfo': ['int', ['int', 'string']],
+      //   'GetVid': ['int', ['int', 'string']]
+      // })
+      // var ref = window.Jscall.ref
+      var aaaa = window.Jscall.clientScreen_GetDeviceInfo()
+      console.log(aaaa)
     },
     tencentHandleClick(thirdpart) {
       alert('ok')
