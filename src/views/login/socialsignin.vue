@@ -27,19 +27,23 @@ export default {
   },
   methods: {
     wechatHandleClick(thirdpart) {
+      var finger = window.Jscall.finger
+      console.log(finger.fingerGFP_Feature())
+
       // const aww = window.Jscall.clientScreenGetWorkingStatus()
       // console.log(aww)
       // aa
       // const aaaa = window.Jscall.clientScreenGetDeviceInfo()
       // console.log(aaaa)
-      this.openFullScreen()
+      // this.openFullScreen()
     },
     openFullScreen() {
       console.log('openFullScreen')
       this.fullscreenLoading = true
       setTimeout(() => {
         console.log('clientScreenShowMainScreen')
-        window.Jscall.clientScreenShowMainScreen('aaaaaa', '啊啊啊啊')
+        console.log(window.Jscall.clientScreen.GetWorkingStatus())
+        // window.Jscall.clientScreen.ShowMainScreen('aaaaaa', '啊啊啊啊')
         this.fullscreenLoading = false
       }, 100)
       console.log('aaaa')
