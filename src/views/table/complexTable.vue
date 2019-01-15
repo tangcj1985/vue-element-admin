@@ -94,7 +94,7 @@
           <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date"/>
         </el-form-item>
         <el-form-item :label="$t('table.title')" prop="title">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="temp.title" @keyup.enter.native="onBlur($event)"/>
         </el-form-item>
         <el-form-item :label="$t('table.status')">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
@@ -149,7 +149,9 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 export default {
   name: 'ComplexTable',
   components: { Pagination },
-  directives: { waves },
+  directives: {
+    waves
+  },
   filters: {
     statusFilter(status) {
       const statusMap = {
@@ -356,6 +358,18 @@ export default {
           return v[j]
         }
       }))
+    },
+    onBlur(ev) {
+      if (ev.keyCode === 13) {
+        console.log(ev)
+        const DOM = ev.target
+        console.log(DOM)
+        const parentDOM = DOM.parentNode
+        console.log(parentDOM)
+        const nextDOM = parentDOM.nextElementSibling
+        console.log(nextDOM)
+        nextDOM.firstChild.focus()
+      }
     }
   }
 }
