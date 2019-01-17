@@ -52,13 +52,17 @@ const tagsView = {
     },
     DEL_OTHERS_CACHED_VIEWS: (state, view) => {
       console.log('DEL_OTHERS_CACHED_VIEWS:' + view.name)
-      for (const i of state.cachedViews) {
-        if (i === view.name) {
+      // 保存该View和其父View
+      state.cachedViews = state.cachedViews.filter(
+        i => view.name.indexOf(i) > -1
+      )
+      /* for (const i of state.cachedViews) {
+         if (i === view.name) {
           const index = state.cachedViews.indexOf(i)
           state.cachedViews = state.cachedViews.slice(index, index + 1)
           break
         }
-      }
+      }*/
     },
 
     DEL_ALL_VISITED_VIEWS: state => {
