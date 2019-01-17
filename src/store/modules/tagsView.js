@@ -5,6 +5,7 @@ const tagsView = {
   },
   mutations: {
     ADD_VISITED_VIEW: (state, view) => {
+      console.log('ADD_VISITED_VIEW:' + view.name)
       if (state.visitedViews.some(v => v.path === view.path)) return
       state.visitedViews.push(
         Object.assign({}, view, {
@@ -15,11 +16,13 @@ const tagsView = {
     ADD_CACHED_VIEW: (state, view) => {
       if (state.cachedViews.includes(view.name)) return
       if (!view.meta.noCache) {
+        console.log('ADD_CACHED_VIEW push:' + view.name)
         state.cachedViews.push(view.name)
       }
     },
 
     DEL_VISITED_VIEW: (state, view) => {
+      // console.log('DEL_VISITED_VIEW:' + view.name)
       for (const [i, v] of state.visitedViews.entries()) {
         if (v.path === view.path) {
           state.visitedViews.splice(i, 1)
@@ -28,6 +31,7 @@ const tagsView = {
       }
     },
     DEL_CACHED_VIEW: (state, view) => {
+      console.log('DEL_CACHED_VIEW:' + view.name)
       for (const i of state.cachedViews) {
         if (i === view.name) {
           const index = state.cachedViews.indexOf(i)
@@ -38,6 +42,7 @@ const tagsView = {
     },
 
     DEL_OTHERS_VISITED_VIEWS: (state, view) => {
+      // console.log('DEL_OTHERS_VISITED_VIEWS:' + view.name)
       for (const [i, v] of state.visitedViews.entries()) {
         if (v.path === view.path) {
           state.visitedViews = state.visitedViews.slice(i, i + 1)
@@ -46,6 +51,7 @@ const tagsView = {
       }
     },
     DEL_OTHERS_CACHED_VIEWS: (state, view) => {
+      console.log('DEL_OTHERS_CACHED_VIEWS:' + view.name)
       for (const i of state.cachedViews) {
         if (i === view.name) {
           const index = state.cachedViews.indexOf(i)
@@ -56,13 +62,16 @@ const tagsView = {
     },
 
     DEL_ALL_VISITED_VIEWS: state => {
+      // console.log('DEL_ALL_VISITED_VIEWS:')
       state.visitedViews = []
     },
     DEL_ALL_CACHED_VIEWS: state => {
+      console.log('DEL_ALL_CACHED_VIEWS:')
       state.cachedViews = []
     },
 
     UPDATE_VISITED_VIEW: (state, view) => {
+      // console.log('UPDATE_VISITED_VIEW:' + view.name)
       for (let v of state.visitedViews) {
         if (v.path === view.path) {
           v = Object.assign(v, view)
@@ -70,7 +79,6 @@ const tagsView = {
         }
       }
     }
-
   },
   actions: {
     addView({ dispatch }, view) {
@@ -81,6 +89,14 @@ const tagsView = {
       commit('ADD_VISITED_VIEW', view)
     },
     addCachedView({ commit }, view) {
+      // [added by tangcj]:路由嵌套大于等于三级，保存第二级之后的view.name TO-TEST:4级嵌套
+      const matched = view.matched
+      if (matched.length >= 3) {
+        for (let i = 1; i < matched.length - 1; i++) {
+          const parentView = matched[i]
+          commit('ADD_CACHED_VIEW', parentView)
+        }
+      }
       commit('ADD_CACHED_VIEW', view)
     },
 
@@ -102,6 +118,35 @@ const tagsView = {
     },
     delCachedView({ commit, state }, view) {
       return new Promise(resolve => {
+        // [added by tangcj]:路由嵌套大于等于三级，保存第二级之后的view.name TO-TEST:4级嵌套
+        const matched = view.matched
+        if (matched.length >= 3) {
+          // 查询父View的其他子View是否在CachedViews中，其他子View.name是否包含父View.name
+          for (let i = matched.length - 2; i >= 1; i--) {
+            const parentView = matched[i] // 父View
+            // console.log('parentView.name:' + i)
+            // console.log(parentView)
+            let canDelete = true
+            for (const j of state.cachedViews) {
+              // console.log('j: ' + j)
+              if (j === parentView.name || j === view.name) {
+                continue
+              }
+              // 其他子View.name包含了父View.name,不允许清理
+              if (j.indexOf(parentView.name) > -1) {
+                canDelete = false
+                break
+              }
+            }
+            if (canDelete) {
+              commit('DEL_CACHED_VIEW', parentView)
+            } else {
+              // 如果当前层级不允许清理，直接跳出循环
+              break
+            }
+          }
+        }
+
         commit('DEL_CACHED_VIEW', view)
         resolve([...state.cachedViews])
       })
