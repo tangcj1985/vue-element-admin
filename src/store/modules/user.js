@@ -1,5 +1,6 @@
 import { loginByUsername, logout, getUserInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getAccessMemu } from '@/api/system/menu'
 
 const user = {
   state: {
@@ -13,7 +14,8 @@ const user = {
     roles: [],
     setting: {
       articlePlatform: []
-    }
+    },
+    accessMenu: [] // 可访问的菜单 added by tangcj
   },
 
   mutations: {
@@ -40,6 +42,10 @@ const user = {
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles
+    },
+    // added by tangcj
+    SET_ACCESS_MENU(state, list) {
+      state.accessMenu = list
     }
   },
 
@@ -48,41 +54,65 @@ const user = {
     LoginByUsername({ commit }, userInfo) {
       const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
-        loginByUsername(username, userInfo.password).then(response => {
-          const data = response.data
-          commit('SET_TOKEN', data.token)
-          setToken(response.data.token)
-          resolve()
-        }).catch(error => {
-          reject(error)
-        })
+        loginByUsername(username, userInfo.password)
+          .then(response => {
+            const data = response.data
+            commit('SET_TOKEN', data.token)
+            setToken(response.data.token)
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
 
     // 获取用户信息
     GetUserInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
-        getUserInfo(state.token).then(response => {
-          // 由于mockjs 不支持自定义状态码只能这样hack
-          if (!response.data) {
-            reject('Verification failed, please login again.')
-          }
-          const data = response.data
+        getUserInfo(state.token)
+          .then(response => {
+            // 由于mockjs 不支持自定义状态码只能这样hack
+            if (!response.data) {
+              reject('Verification failed, please login again.')
+            }
+            const data = response.data
 
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-          } else {
-            reject('getInfo: roles must be a non-null array!')
-          }
+            if (data.roles && data.roles.length > 0) {
+              // 验证返回的roles是否是一个非空数组
+              commit('SET_ROLES', data.roles)
+            } else {
+              reject('getInfo: roles must be a non-null array!')
+            }
 
-          commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
-          commit('SET_INTRODUCTION', data.introduction)
-          resolve(response)
-        }).catch(error => {
-          reject(error)
-        })
+            commit('SET_NAME', data.name)
+            commit('SET_AVATAR', data.avatar)
+            commit('SET_INTRODUCTION', data.introduction)
+
+            // added by tangcj
+            const permission = [...data.roles, ...data.userPermission]
+            const isAdmin = data.isAdmin
+            localStorage.setItem('permission', JSON.stringify(permission))
+            localStorage.setItem('isAdmin', isAdmin)
+
+            resolve(response)
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
+    },
+
+    // added by tangcj
+    async updateAccessMenu({ commit }) {
+      let accesseMenu = {}
+      try {
+        const response = await getAccessMemu()
+        accesseMenu = response.data.data
+      } catch (e) {
+        console.log(e)
+      }
+      commit('SET_ACCESS_MENU', accesseMenu)
     },
 
     // 第三方验证登录
@@ -102,14 +132,16 @@ const user = {
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
-          removeToken()
-          resolve()
-        }).catch(error => {
-          reject(error)
-        })
+        logout(state.token)
+          .then(() => {
+            commit('SET_TOKEN', '')
+            commit('SET_ROLES', [])
+            removeToken()
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       })
     },
 
