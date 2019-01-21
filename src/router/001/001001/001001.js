@@ -3,6 +3,7 @@ import g001001002Router from './001001002/001001002'
 
 const g001001Router = {
   path: '001001',
+  component: () => import('@/views/001/001001'),
   redirect: '/',
   name: '001001',
   meta: {
