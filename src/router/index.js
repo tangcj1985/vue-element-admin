@@ -12,6 +12,7 @@ import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
 import g001Router from './001/001'
+import A002Router from './A002'
 
 /** note: Submenu only appear when children.length>=1
  *  detail see  https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -163,6 +164,7 @@ export const asyncRouterMap = [
   nestedRouter,
   tableRouter,
   g001Router,
+  A002Router,
   {
     path: '/example',
     component: Layout,

@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-input/>
+    <el-input />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'G001001001001001001461010'
+  name: 'A002B002T563044'
 }
 </script>
