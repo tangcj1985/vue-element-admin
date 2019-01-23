@@ -2,13 +2,27 @@
   <div>
     <el-row :gutter="10" style="margin-top:20px;">
       <el-col :span="10">
-        <el-card class="box-card">
-          <div>
-            <span>交易菜单1</span>
+        <el-card v-loading="isEdit" element-loading-text="正在编辑中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.2)" class="box-card">
+          <div style="margin-bottom: 20px">
+            <!-- <span>交易菜单1</span> -->
+            <el-button type="primary" icon="el-icon-plus">添加</el-button>
+            <el-button type="primary" icon="el-icon-edit">编辑</el-button>
+            <el-button type="primary" icon="el-icon-delete">删除</el-button>
           </div>
+          <el-row :gutter="20">
+            <el-col :span="8">
+              <el-button type="primary" icon="el-icon-plus">添加</el-button>
+            </el-col>
+            <el-col :span="8">
+              <el-button type="primary" icon="el-icon-edit">编辑</el-button>
+            </el-col>
+            <el-col :span="8">
+              <el-button type="danger" icon="el-icon-delete">删除</el-button>
+            </el-col>
+          </el-row>
           <div style="height:500px;">
             <el-tree ref="eltree" :data="data5" :expand-on-click-node="false" :highlight-current="true" node-key="grpid" default-expand-all @node-click="handleNodeClick">
-              <span slot-scope="{ node, data }" class="custom-tree-node">
+              <span slot-scope="{ node, data }" :disabled="false" class="custom-tree-node">
                 <span>{{ node.label }}</span>
                 <span>
                   <el-button type="text" size="mini" @click="() => append(data)">
@@ -29,10 +43,10 @@
           <div>
             <el-form ref="form" :model="form" :rules="submitRules" label-width="120px">
               <el-form-item label="上级交易组:">
-                <el-input v-model="form.grpsuperid" :readonly="true" style="width:150px;" />
+                <el-input v-model="form.grpsuperid" :readonly="true" style="width:180px;" />
               </el-form-item>
               <el-form-item prop="grpid" label="交易组ID:">
-                <el-input v-model="form.grpid" placeholder="交易组ID" style="width:150px;" />
+                <el-input v-model="form.grpid" placeholder="交易组ID" style="width:180px;" />
               </el-form-item>
               <el-form-item prop="grpname" label="交易组名称:">
                 <el-input v-model="form.grpname" placeholder="交易组名称" style="width:200px;" />
@@ -42,7 +56,7 @@
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="onSubmit">提交</el-button>
-                <el-button>取消</el-button>
+                <el-button @click="resetForm('form')">取消</el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -113,6 +127,7 @@ export default {
     }
     return {
       isEdit: false,
+      isDelete: false,
       data5: JSON.parse(JSON.stringify(data)),
       form: {
         grpid: '',
@@ -213,6 +228,12 @@ export default {
     },
 
     remove(node, data) {
+      console.log('remove')
+      this.isDelete = true
+      if (node.childNodes && node.childNodes.length > 0) {
+        this.$message.error('存在子节点，无法删除！')
+        return
+      }
       const parent = node.parent
       // 用以下方法删除后，父节点下面如果没有子节点，箭头仍然存在
       // const childrenNodes = parent.childNodes || parent
@@ -226,6 +247,8 @@ export default {
       children.splice(index, 1)
       // this.$set(data, 'children', children)
       this.data5 = JSON.parse(JSON.stringify(this.data5))
+      this.$message.success('删除成功！')
+      this.resetForm('form')
     },
     onSubmit() {
       const newChild = {
@@ -242,9 +265,14 @@ export default {
       // console.log(this.$refs.eltree.getCurrentNode())
 
       this.$message.success('提交成功！')
+      this.isEdit = false
     },
     handleNodeClick(data, node) {
       if (this.isEdit) {
+        return
+      }
+      if (this.isDelete) {
+        this.isDelete = false
         return
       }
       console.log('handleNodeClick')
@@ -252,6 +280,12 @@ export default {
       this.form.grpid = data.grpid
       this.form.grpsuperid = node.parent.data.grpid
       this.form.grpname = data.label
+    },
+    resetForm() {
+      this.isEdit = false
+      for (const key in this.form) {
+        this.form[key] = ''
+      }
     },
     editMenu(id) {
       // if (!id || this.tempMenu.id === id) {
